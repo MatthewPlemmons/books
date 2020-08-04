@@ -1,15 +1,12 @@
 import os
-
 import requests
 import json
 
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from helpers import login_required, err
+from database import db
 
 
 app = Flask(__name__)
@@ -23,9 +20,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Set up database
-engine = create_engine(os.getenv("DATABASE_URL"))
-db = scoped_session(sessionmaker(bind=engine))
+# Set up Goodreads API Key
 key = os.getenv("GOODREADS_KEY")
 
 @app.route("/", methods=["GET", "POST"])
@@ -38,12 +33,11 @@ def index():
             flash("Enter a book title, author, or ISBN to search for.")
             return render_template("search.html")
 
-        # The title method capitalizes the first character in each word of a string.
         if query[0].isalpha():
-            query = query.title()
+            query = query.title() # Capitalize each word in a string
 
-        #books = db.execute("SELECT * FROM books WHERE title LIKE '%a%'", {"a": query}).fetchall()
-        books = db.execute("SELECT *, authors.name FROM books INNER JOIN authors ON books.author0=authors.auth_id WHERE \
+        books = db.execute("SELECT *, authors.name FROM books INNER JOIN \
+                            authors ON books.author0=authors.auth_id WHERE \
                             books.title LIKE :a OR \
                             authors.name LIKE :a OR \
                             books.isbn LIKE :a",
@@ -64,29 +58,38 @@ def book(book_id):
 
     if request.method == "GET":
         user_id = session['user_id']
-        #book = db.execute("SELECT * FROM books WHERE book_id=:id", {"id": book_id}).fetchone()
-        b = db.execute("SELECT *, authors.name FROM books INNER JOIN authors ON books.author0=authors.auth_id WHERE books.book_id=:id", {"id": book_id}).fetchone()
+        b = db.execute("SELECT *, authors.name FROM books INNER JOIN \
+                        authors ON books.author0=authors.auth_id WHERE \
+                        books.book_id=:id", {"id": book_id}).fetchone()
         #if book is None:
             # Display error message
-        reviews = db.execute("SELECT *, users.username FROM reviews INNER JOIN users ON reviews.user_id=users.id WHERE book_id=:book_id", {"book_id": book_id}).fetchall()
+        reviews = db.execute("SELECT *, users.username FROM \
+                            reviews INNER JOIN users ON \
+                            reviews.user_id=users.id WHERE book_id=:book_id",
+                            {"book_id": book_id}).fetchall()
 
-        # Take the book.isbn (or b.isbn) and pass it along to the GoodReads API to get the 
-        # json data for the book.  Then pull the average_rating and work_ratings_count from that json.
-        res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": key, "isbns": b.isbn})
+        # Use ISBN to retrieve book's json data from the Goodreads API
+        res = requests.get("https://www.goodreads.com/book/review_counts.json",
+                            params={"key": key, "isbns": b.isbn})
         res = res.json()
         avg_rating = res["books"][0]["average_rating"]
         work_ratings_count = res["books"][0]["work_ratings_count"]
 
         book = dict(b)
-        book.update({"review_avg": avg_rating, "work_ratings_count": work_ratings_count})
+        book.update({"review_avg": avg_rating,
+                    "work_ratings_count": work_ratings_count})
 
-        # Search all the reviews for this book to see if the user has already posted a review.
+        # Check if user has already reviewed this book
         for review in reviews:
             if review.user_id == user_id:
                 user_review_exists = True
                 break
         
-        return render_template("books.html", book=book, reviews=reviews, user_id=user_id, user_review_exists=user_review_exists)
+        return render_template("books.html", 
+                                book=book, 
+                                reviews=reviews, 
+                                user_id=user_id, 
+                                user_review_exists=user_review_exists)
     
     if request.method == "POST":
         user_review_exists = False
@@ -95,8 +98,12 @@ def book(book_id):
         star_rating = request.form.get("rate")
         review_text = request.form.get("reviewText")
 
-        book = db.execute("SELECT *, authors.name FROM books INNER JOIN authors ON books.author0=authors.auth_id WHERE books.book_id=:id", {"id": book_id}).fetchone()
-        reviews = db.execute("SELECT *, users.username FROM reviews INNER JOIN users ON reviews.user_id=users.id WHERE book_id=:book_id", {"book_id": book_id}).fetchall()
+        book = db.execute("SELECT *, authors.name FROM books INNER JOIN \
+                            authors ON books.author0=authors.auth_id WHERE \
+                            books.book_id=:id", {"id": book_id}).fetchone()
+        reviews = db.execute("SELECT *, users.username FROM reviews INNER JOIN \
+                            users ON reviews.user_id=users.id WHERE \
+                            book_id=:book_id", {"book_id": book_id}).fetchall()
 
         for review in reviews:
             if review.user_id == user_id:
@@ -105,23 +112,35 @@ def book(book_id):
                 break
 
         if user_review_exists:
-            db.execute("UPDATE reviews SET rating=:rating, review_text=:review_text WHERE id=:id",
-                    {"rating": star_rating, "review_text": review_text, "id": review_id})
+            db.execute("UPDATE reviews SET \
+                    rating=:rating, review_text=:review_text WHERE id=:id",
+                    {"rating": star_rating,
+                    "review_text": review_text,
+                    "id": review_id})
         else:
-            db.execute("INSERT INTO reviews (rating, review_text, book_id, user_id) VALUES (:rating, :review_text, :book_id, :user_id)",
-                    {"rating": star_rating, "review_text": review_text, "book_id": book_id, "user_id": user_id})
+            db.execute("INSERT INTO \
+                    reviews (rating, review_text, book_id, user_id) VALUES \
+                    (:rating, :review_text, :book_id, :user_id)",
+                    {"rating": star_rating, "review_text": review_text,
+                    "book_id": book_id, "user_id": user_id})
         db.commit()
 
         # Retrieve the reviews again to provide the new, or updated, review to the web page.
-        reviews = db.execute("SELECT *, users.username FROM reviews INNER JOIN users ON reviews.user_id=users.id WHERE book_id=:book_id", {"book_id": book_id}).fetchall()
-        return render_template("books.html", book=book, reviews=reviews, user_id=user_id, user_review_exists=True)
+        reviews = db.execute("SELECT *, users.username FROM reviews INNER JOIN \
+                            users ON reviews.user_id=users.id WHERE \
+                            book_id=:book_id", {"book_id": book_id}).fetchall()
+        return render_template("books.html", book=book, reviews=reviews, 
+                                user_id=user_id, user_review_exists=True)
 
 @app.route("/api/<isbn>", methods=["GET"])
 def api(isbn):
 
     try:
-        book = db.execute("SELECT *, authors.name FROM books INNER JOIN authors ON books.author0=authors.auth_id WHERE books.isbn=:isbn", {"isbn": isbn}).fetchone()
-        res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": key, "isbns": book.isbn})
+        book = db.execute("SELECT *, authors.name FROM books INNER JOIN \
+                            authors ON books.author0=authors.auth_id WHERE \
+                            books.isbn=:isbn", {"isbn": isbn}).fetchone()
+        res = requests.get("https://www.goodreads.com/book/review_counts.json",
+                            params={"key": key, "isbns": book.isbn})
     except:
         return "404: isbn not found"
     
@@ -189,8 +208,10 @@ def register():
             return render_template("register.html")
 
         passhash = generate_password_hash(request.form.get("password"))
-        db.execute("INSERT INTO users (username, password) VALUES (:username, :password)",
+        db.execute("INSERT INTO users (username, password) VALUES \
+            (:username, :password)",
             {"username": username, "password": passhash})
+            
         db.commit()
         return redirect("/")
     
@@ -204,5 +225,3 @@ def logout():
     # Forget any user id
     session.clear()
     return redirect("/")
-
-
