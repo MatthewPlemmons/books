@@ -1,0 +1,76 @@
+@charset "UTF-8";
+
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: grid;
+    place-items: center;
+}
+
+.center-section {
+    display: flex;
+    flex-direction: column;
+    max-width: 768px;
+}
+
+.main-cover {
+    margin: 8px 24px 8px 8px;
+    float: left;
+}
+
+.book-cover-s {
+    margin: 8px;
+    float: left;
+}
+
+.user-reviews {
+    margin: 8px 0 8px 0;
+}
+
+.form-inline {
+    flex-flow: row;
+    width: -webkit-fill-available;
+}
+
+.form-control {
+    width: 100%;
+}
+
+.btn {
+    float: right;
+}
+
+#user-icon {
+    height: 25px;
+    width: 25px;
+    border-radius: 45%;
+}
+
+.user-reviews {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#user-review {
+    padding: 12px 0px 12px 0px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.user-name-and-icon {
+    margin-bottom: 4px;
+}
+
+.user-star-rating {
+    margin-bottom: 8px;
+}
+
+.user-review-text-box {
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background-color: aliceblue;
+}

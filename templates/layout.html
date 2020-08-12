@@ -14,7 +14,7 @@
         <!-- https://favicon.io/emoji-favicons/money-mouth-face/ -->
         <link href="/static/favicon.ico" rel="icon">
 
-        <link href="/static/styles.css" rel="stylesheet">
+        <link href="/static/styles/styles.css" rel="stylesheet">
         <link href="/static/styles/stars.css" rel="stylesheet">
 
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -34,16 +34,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session.user_id %}
-                    <!-- <ul class="navbar-nav mr-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/search">Search</a></li>
-                    </ul> -->
                     <ul class="navbar-nav ml-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+                        {% block login %}{% endblock %}
                     </ul>
                 {% endif %}
             </div>
@@ -57,8 +53,10 @@
             </header>
         {% endif %}
 
-        <main class="container p-5">
-            {% block main %}{% endblock %}
+        <main class="container py-5">
+                <div class="center-section">
+                    {% block main %}{% endblock %}
+                </div>
         </main>
         
         <footer class="small text-center text-muted">

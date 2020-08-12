@@ -5,20 +5,23 @@
 {% endblock %}
 
 {% block main %}
-    <h3> {{ book.title }} </h3>
+    <div class="book-info">
+        <div class="main-cover">
+            <img src="http://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg"/>
+        </div>
+        <h3> {{ book.title }} </h3>
 
-    <h5>by {{ book.name }} </h5>
-    <span>Published {{ book.year }} </span>
-    <br>
-    <span>ISBN: {{ book.isbn }} </span>
-    <br>
-    <span>Average Review: {{ book.review_avg }} ({{ book.work_ratings_count }} reviews from Goodreads) </span>
+        <h5>by {{ book.name }} </h5>
+        <span>Published {{ book.year }} </span>
+        <br>
+        <span>ISBN: {{ book.isbn }} </span>
+        <br>
+        <span>Average Review: {{ book.review_avg }} ({{ book.work_ratings_count }} reviews from Goodreads) </span>
+    </div>
+
     <hr>
 
-    <div>
-        <h5>Reader Reviews</h5>
-
-
+    <div class="review-area">
         {% if user_review_exists %}
             <button type="button" class="btn btn-outline-secondary" data-toggle="collapse" data-target="#collapseReview" aria-expanded="false" aria-controls="collapseReview">
                 Edit Review
@@ -29,58 +32,62 @@
             </button>
         {% endif %}
         <div class="collapse" id="collapseReview">
-            <div class="container">
-                <form class="my-2" method="post">
-                    <div class="form-group">
 
-                        <!-- <div class="Stars" style="--rating: 2.3;" aria-label="Rating of this product is 2.3 out of 5."> -->
-                       
-                        <div class="rate">
-                            <input type="radio" id="star5" name="rate" value="5" />
-                            <label for="star5" title="text">5 stars</label>
-                            <input type="radio" id="star4" name="rate" value="4" />
-                            <label for="star4" title="text">4 stars</label>
-                            <input type="radio" id="star3" name="rate" value="3" />
-                            <label for="star3" title="text">3 stars</label>
-                            <input type="radio" id="star2" name="rate" value="2" />
-                            <label for="star2" title="text">2 stars</label>
-                            <input type="radio" id="star1" name="rate" value="1" />
-                            <label for="star1" title="text">1 star</label>
-                        </div>
-                        
-                        {% if user_review_exists %}
-                            {% for review in reviews %}
-                                {% if review.user_id == user_id %}
-                                  <textarea class="my-2 form-control" id="reviewTextarea" name="reviewText" rows="4">{{ review.review_text }}</textarea>
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <textarea class="my-2 form-control" id="reviewTextarea" name="reviewText" rows="3"></textarea>
-                        {% endif %}
-                        <div class="d-flex flex-row-reverse">
-                            <button class="btn btn-primary" type="submit">Submit</button>
-                        </div>
+            <form class="review-form my-2" method="post">
+                <div class="form-group">
+                    
+                    <div class="rate">
+                        <input type="radio" id="star5" name="rate" value="5" required />
+                        <label for="star5" title="text">5 stars</label>
+                        <input type="radio" id="star4" name="rate" value="4" required />
+                        <label for="star4" title="text">4 stars</label>
+                        <input type="radio" id="star3" name="rate" value="3" required />
+                        <label for="star3" title="text">3 stars</label>
+                        <input type="radio" id="star2" name="rate" value="2" required />
+                        <label for="star2" title="text">2 stars</label>
+                        <input type="radio" id="star1" name="rate" value="1" required />
+                        <label for="star1" title="text">1 star</label>
                     </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="user-reviews">
-            {% for review in reviews %}
-                <div id="user-review">
-                    <img src="../static/person-icon.jpg" id="user-icon"><b> {{ review.username }} </b>
-                    <br>
-                    Star Rating: {{ review.rating }}
-                    <br>
-                    {{ review.review_text }}
-                    <br>
-                    {{ review.time.ctime() }}
-                    <br>
+                    
+                    {% if user_review_exists %}
+                        {% for review in reviews %}
+                            {% if review.user_id == user_id %}
+                                <textarea class="my-2 form-control" id="reviewTextarea" name="reviewText" rows="4">{{ review.review_text }}</textarea>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <textarea class="my-2 form-control" id="reviewTextarea" name="reviewText" rows="3"></textarea>
+                    {% endif %}
+                    <div class="d-flex flex-row-reverse">
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                    </div>
                 </div>
-            {% endfor %}
+            </form>
         </div>
-        <!-- optional: display total number of reader reviews for this book -->
-        <!-- pull all reader reviews for this book and display each -->
     </div>
+
+    <h5>Reader Reviews</h5>
+    <div class="user-reviews">
+        {% for review in reviews %}
+            <div id="user-review">
+                <div class="user-name-and-icon">
+                <img src="../static/person-icon.jpg" id="user-icon"><b> {{ review.username }} </b>
+                </div>
+
+                <div class="user-star-rating">
+                    <img src="../static/{{ review.rating }}.png">
+                </div>
+
+                <div class="user-review-text-box">
+                    {{ review.review_text }}
+                </div>
+
+                <div class="user-review-date">
+                {{ review.time.strftime("%B %d, %Y") }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
 
 {% endblock %}

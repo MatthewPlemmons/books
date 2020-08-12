@@ -8,14 +8,16 @@
 
     <form class="form-inline mb-2" action="/" method="post">
         <!-- <div class="form-group"> -->
-        <input autocomplete="off" autofocus class="form-control w-50 mr-2" name="search" placeholder="" type="text">
+        <input class="form-control mr-2" autocomplete="off"   name="search" placeholder="" type="text" autofocus>
         <!-- </div> -->
         <button class="btn btn-primary" type="submit">Search</button>
     </form>
     <br>
-    <div>
+    <div class="book-container">
         {% for book in books %}
-        <div>
+        <div class=book-cover-s>
+            <img src="http://covers.openlibrary.org/b/isbn/{{ book.isbn }}-S.jpg"/>
+        </div>
             <span>
                 <b>
                     <a href="{{ url_for('book', book_id=book.book_id) }}"> 
@@ -28,7 +30,7 @@
             <br>
             <span class="font-weight-light">published {{ book.year }}</span>
             <hr/>
-        </div>
+
         {% endfor %}
     </div>
 
