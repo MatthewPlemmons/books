@@ -9,6 +9,9 @@
 {% endblock %}
 
 {% block main %}
+    <div class="log-in-header">
+        Log In
+    </div>
     <form action="/login" method="post">
         <div class="form-group">
             <label for="username">Username</label>
@@ -16,7 +19,7 @@
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input class="form-control" name="password" placeholder="Password" type="password" required>
+            <input class="form-control" name="current-password" placeholder="Password" type="password">
         </div>
         <button class="btn btn-primary" type="submit">Log In</button>
     </form>

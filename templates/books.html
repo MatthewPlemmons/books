@@ -10,7 +10,6 @@
             <img src="http://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg"/>
         </div>
         <h3> {{ book.title }} </h3>
-
         <h5>by {{ book.name }} </h5>
         <span>Published {{ book.year }} </span>
         <br>
@@ -67,7 +66,13 @@
     </div>
 
     <h5>Reader Reviews</h5>
+    <hr>
     <div class="user-reviews">
+
+        {% if not reviews %}
+            <i>There are currently no reviews for this book.</i>
+        {% endif %}
+
         {% for review in reviews %}
             <div id="user-review">
                 <div class="user-name-and-icon">
@@ -88,6 +93,5 @@
             </div>
         {% endfor %}
     </div>
-    
 
 {% endblock %}
