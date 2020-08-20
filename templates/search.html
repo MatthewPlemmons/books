@@ -6,13 +6,14 @@
 
 {% block main %}
 
-    <form class="form-inline mb-2" action="/" method="post">
-        <!-- <div class="form-group"> -->
-        <input class="form-control mr-2" autocomplete="off"   name="search" placeholder="" type="text" autofocus>
-        <!-- </div> -->
-        <button class="btn btn-primary" type="submit">Search</button>
-    </form>
-    <br>
+    <div class="book-searchbox">
+        <form class="form-inline mb-2" action="/" method="post">
+            <!-- <div class="form-group"> -->
+            <input class="form-control mr-2" autocomplete="off"   name="search" placeholder="" type="text" autofocus>
+            <!-- </div> -->
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+    </div>
     <div class="book-container">
         {% for book in books %}
         <div class=book-cover-s>
@@ -25,7 +26,7 @@
                     </a>
                 </b>
             </span>
-            <br> 
+            <br>
             <span>by {{ book.name }}</span>
             <br>
             <span class="font-weight-light">published {{ book.year }}</span>
