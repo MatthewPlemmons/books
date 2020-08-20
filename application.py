@@ -84,7 +84,7 @@ def book(book_id):
             if review.user_id == user_id:
                 user_review_exists = True
                 break
-        
+
         return render_template("books.html", 
                                 book=book, 
                                 reviews=reviews, 
@@ -170,7 +170,7 @@ def login():
             flash("Must provide username.")
             return render_template("login.html")
 
-        password = request.form.get("password")
+        password = request.form.get("current-password")
         if not password:
             flash("Must provide password.")
             return render_template("login.html")
@@ -201,13 +201,13 @@ def register():
         if usr is not None:
             flash("Name already in use.")
             return render_template("register.html")
- 
-        password = request.form.get("password")
+
+        password = request.form.get("new-password")
         if not password or len(password) < 5:
             flash("Password must contain at least 5 characters.")
             return render_template("register.html")
 
-        passhash = generate_password_hash(request.form.get("password"))
+        passhash = generate_password_hash(password)
         db.execute("INSERT INTO users (username, password) VALUES \
             (:username, :password)",
             {"username": username, "password": passhash})
