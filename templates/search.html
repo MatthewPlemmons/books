@@ -9,11 +9,14 @@
     <div class="book-searchbox">
         <form class="form-inline mb-2" action="/" method="post">
             <!-- <div class="form-group"> -->
-            <input class="form-control mr-2" autocomplete="off"   name="search" placeholder="" type="text" autofocus>
+            <input class="form-control mr-2" autocomplete="off" name="search" placeholder="" type="text" autofocus>
             <!-- </div> -->
             <button class="btn btn-primary" type="submit">Search</button>
         </form>
     </div>
+    {% if not books %}
+        <p>Search books by title, author, or ISBN.</p>
+    {% endif %}
     <div class="book-container">
         {% for book in books %}
         <div class=book-cover-s>
