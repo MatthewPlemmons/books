@@ -1,5 +1,5 @@
 ### Book Review
-A web app for writing book reviews.
+A web app for writing book reviews.  View demo [here](https://book-project-002.herokuapp.com/).
 
 #### Installation
 Download the requirements.
